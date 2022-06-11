@@ -601,9 +601,9 @@ public:
                 break;
             }
 
-            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Remove all glyphs", GOSSIP_SENDER_MAIN, 30);
-            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Reset Talents", GOSSIP_SENDER_MAIN, 31);
-            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Destroy my equipped gear", GOSSIP_SENDER_MAIN, 32);
+            //AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Remove all glyphs", GOSSIP_SENDER_MAIN, 30);
+            //AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Reset Talents", GOSSIP_SENDER_MAIN, 31);
+            //AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Destroy my equipped gear", GOSSIP_SENDER_MAIN, 32);
             SendGossipMenuFor(player, 55002, me->GetGUID());
             return true;
         }
@@ -623,7 +623,7 @@ public:
                 {
                     if (haveItemEquipped)
                     {
-                        player->GetSession()->SendAreaTriggerMessage("You need to remove all your equipped items in order to use this feature!");
+                        player->GetSession()->SendAreaTriggerMessage("Failed to remove items. Are you in combat?");
                         CloseGossipMenuFor(player);
                         return;
                     }
@@ -633,7 +633,7 @@ public:
             // Don't let players to use Template feature after spending some talent points
             if (player->GetFreeTalentPoints() < 71)
             {
-                player->GetSession()->SendAreaTriggerMessage("You have already spent some talent points. You need to reset your talents first!");
+                player->GetSession()->SendAreaTriggerMessage("Failed to reset talents. Are you in combat?");
                 CloseGossipMenuFor(player);
                 return;
             }
@@ -753,7 +753,7 @@ public:
                     }
                 }
             }
-            player->GetSession()->SendAreaTriggerMessage("Your equipped gear has been destroyed and your talents and glyphs have been reset.");
+            //player->GetSession()->SendAreaTriggerMessage("Your equipped gear has been destroyed and your talents and glyphs have been reset.");
 
 			// Add new gear, talents and glyphs
             switch (action)
