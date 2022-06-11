@@ -16,7 +16,7 @@
 
 void sTemplateNPC::LearnPlateMailSpells(Player* player)
 {
-    switch (player->getClass())
+    switch (player->GetClass())
     {
     case CLASS_WARRIOR:
     case CLASS_PALADIN:
@@ -51,10 +51,10 @@ void sTemplateNPC::ApplyGlyph(Player* player, uint8 slot, uint32 glyphID)
     {
         if (uint32 oldGlyph = player->GetGlyph(slot))
         {
-            player->RemoveAurasDueToSpell(sGlyphPropertiesStore.LookupEntry(oldGlyph)->SpellId);
+            player->RemoveAurasDueToSpell(sGlyphPropertiesStore.LookupEntry(oldGlyph)->SpellID);
             player->SetGlyph(slot, 0);
         }
-        player->CastSpell(player, gp->SpellId, true);
+        player->CastSpell(player, gp->SpellID, true);
         player->SetGlyph(slot, glyphID);
     }
 }
@@ -69,7 +69,7 @@ void sTemplateNPC::RemoveAllGlyphs(Player* player)
             {
                 if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(player->GetGlyphSlot(i)))
                 {
-                    player->RemoveAurasDueToSpell(sGlyphPropertiesStore.LookupEntry(glyph)->SpellId);
+                    player->RemoveAurasDueToSpell(sGlyphPropertiesStore.LookupEntry(glyph)->SpellID);
                     player->SetGlyph(i, 0);
                     player->SendTalentsInfoData(false); // this is somewhat an in-game glyph realtime update (apply/remove)
                 }
@@ -104,7 +104,7 @@ void sTemplateNPC::LearnTemplateGlyphs(Player* player)
 
 void sTemplateNPC::EquipTemplateGear(Player* player)
 {
-    if (player->getRace() == RACE_HUMAN)
+    if (player->GetRace() == RACE_HUMAN)
     {
         for (HumanGearContainer::const_iterator itr = m_HumanGearContainer.begin(); itr != m_HumanGearContainer.end(); ++itr)
         {
@@ -120,7 +120,7 @@ void sTemplateNPC::EquipTemplateGear(Player* player)
             }
         }
     }
-    else if (player->GetTeam() == ALLIANCE && player->getRace() != RACE_HUMAN)
+    else if (player->GetTeam() == ALLIANCE && player->GetRace() != RACE_HUMAN)
     {
         for (AllianceGearContainer::const_iterator itr = m_AllianceGearContainer.begin(); itr != m_AllianceGearContainer.end(); ++itr)
         {
@@ -348,7 +348,7 @@ void sTemplateNPC::LoadHordeGearContainer()
 
 std::string sTemplateNPC::GetClassString(Player* player)
 {
-    switch (player->getClass())
+    switch (player->GetClass())
     {
     case CLASS_PRIEST:       return "Priest";      break;
     case CLASS_PALADIN:      return "Paladin";     break;
@@ -373,13 +373,13 @@ bool sTemplateNPC::OverwriteTemplate(Player* player, std::string& playerSpecStr)
     CharacterDatabase.PExecute("DELETE FROM template_npc_glyphs WHERE playerClass = '%s' AND playerSpec = '%s';", GetClassString(player).c_str(), playerSpecStr.c_str());
 
     // Delete old gear templates before extracting new ones
-    if (player->getRace() == RACE_HUMAN)
+    if (player->GetRace() == RACE_HUMAN)
     {
         CharacterDatabase.PExecute("DELETE FROM template_npc_human WHERE playerClass = '%s' AND playerSpec = '%s';", GetClassString(player).c_str(), playerSpecStr.c_str());
         player->GetSession()->SendAreaTriggerMessage("Template successfuly created!");
         return false;
     }
-    else if (player->GetTeam() == ALLIANCE && player->getRace() != RACE_HUMAN)
+    else if (player->GetTeam() == ALLIANCE && player->GetRace() != RACE_HUMAN)
     {
         CharacterDatabase.PExecute("DELETE FROM template_npc_alliance WHERE playerClass = '%s' AND playerSpec = '%s';", GetClassString(player).c_str(), playerSpecStr.c_str());
         player->GetSession()->SendAreaTriggerMessage("Template successfuly created!");
@@ -402,14 +402,14 @@ void sTemplateNPC::ExtractGearTemplateToDB(Player* player, std::string& playerSp
 
         if (equippedItem)
         {
-            if (player->getRace() == RACE_HUMAN)
+            if (player->GetRace() == RACE_HUMAN)
             {
                 CharacterDatabase.PExecute("INSERT INTO template_npc_human (`playerClass`, `playerSpec`, `pos`, `itemEntry`, `enchant`, `socket1`, `socket2`, `socket3`, `bonusEnchant`, `prismaticEnchant`) VALUES ('%s', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');"
                     , GetClassString(player).c_str(), playerSpecStr.c_str(), equippedItem->GetSlot(), equippedItem->GetEntry(), equippedItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT),
                     equippedItem->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT), equippedItem->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT_2), equippedItem->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT_3),
                     equippedItem->GetEnchantmentId(BONUS_ENCHANTMENT_SLOT), equippedItem->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT));
             }
-            else if (player->GetTeam() == ALLIANCE && player->getRace() != RACE_HUMAN)
+            else if (player->GetTeam() == ALLIANCE && player->GetRace() != RACE_HUMAN)
             {
                 CharacterDatabase.PExecute("INSERT INTO template_npc_alliance (`playerClass`, `playerSpec`, `pos`, `itemEntry`, `enchant`, `socket1`, `socket2`, `socket3`, `bonusEnchant`, `prismaticEnchant`) VALUES ('%s', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');"
                     , GetClassString(player).c_str(), playerSpecStr.c_str(), equippedItem->GetSlot(), equippedItem->GetEntry(), equippedItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT),
@@ -508,7 +508,7 @@ void sTemplateNPC::ExtractGlyphsTemplateToDB(Player* player, std::string& player
 
 bool sTemplateNPC::CanEquipTemplate(Player* player, std::string& playerSpecStr)
 {
-    if (player->getRace() == RACE_HUMAN)
+    if (player->GetRace() == RACE_HUMAN)
     {
         QueryResult result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec FROM template_npc_human "
             "WHERE playerClass = '%s' AND playerSpec = '%s';", GetClassString(player).c_str(), playerSpecStr.c_str());
@@ -516,7 +516,7 @@ bool sTemplateNPC::CanEquipTemplate(Player* player, std::string& playerSpecStr)
         if (!result)
             return false;
     }
-    else if (player->GetTeam() == ALLIANCE && player->getRace() != RACE_HUMAN)
+    else if (player->GetTeam() == ALLIANCE && player->GetRace() != RACE_HUMAN)
     {
         QueryResult result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec FROM template_npc_alliance "
             "WHERE playerClass = '%s' AND playerSpec = '%s';", GetClassString(player).c_str(), playerSpecStr.c_str());
@@ -544,9 +544,9 @@ public:
     {
         TemplateNPC_AI(Creature* creature) : ScriptedAI(creature) { }
 
-        bool GossipHello(Player* player) override
+        bool OnGossipHello(Player* player) override
         {
-            switch (player->getClass())
+            switch (player->GetClass())
             {
             case CLASS_PRIEST:
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\spell_holy_wordfortitude:30|t|r Use Discipline Spec", GOSSIP_SENDER_MAIN, 0);
@@ -601,9 +601,9 @@ public:
                 break;
             }
 
-            /*AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Remove all glyphs", GOSSIP_SENDER_MAIN, 30);
+            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Remove all glyphs", GOSSIP_SENDER_MAIN, 30);
             AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Reset Talents", GOSSIP_SENDER_MAIN, 31);
-            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Destroy my equipped gear", GOSSIP_SENDER_MAIN, 32);*/
+            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\Spell_ChargeNegative:30|t|r Destroy my equipped gear", GOSSIP_SENDER_MAIN, 32);
             SendGossipMenuFor(player, 55002, me->GetGUID());
             return true;
         }
@@ -714,7 +714,7 @@ public:
             player->LearnSpell(Amani_War_Bear, false);
         }
 
-        bool GossipSelect(Player* player, uint32 /*uiSender*/, uint32 uiAction) override
+        bool OnGossipSelect(Player* player, uint32 /*uiSender*/, uint32 uiAction) override
         {
             uint32 sender = player->PlayerTalkClass->GetGossipOptionSender(uiAction);
             uint32 action = player->PlayerTalkClass->GetGossipOptionAction(uiAction);
@@ -723,7 +723,39 @@ public:
 
             if (!player || !me)
                 return false;
+                
+            // Destroy gear and reset talents and glyphs
+            // Reset glyphs
+            sTemplateNpcMgr->RemoveAllGlyphs(player);
+            
+            // Reset talents
+            player->ResetTalents(true);
+            player->SendTalentsInfoData(false);
+            
+            // Destroy gear
+            for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+            {
+                if (Item* haveItemEquipped = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                {
+                    if (haveItemEquipped)
+                    {
+                        player->DestroyItemCount(haveItemEquipped->GetEntry(), 1, true, true);
 
+                        if (haveItemEquipped->IsInWorld())
+                        {
+                            haveItemEquipped->RemoveFromWorld();
+                            haveItemEquipped->DestroyForPlayer(player);
+                        }
+
+                        //haveItemEquipped->SetGuidValue(ITEM_FIELD_CONTAINED, ObjectGuid::Empty);
+                        //haveItemEquipped->SetSlot(NULL_SLOT);
+                        //haveItemEquipped->SetState(ITEM_REMOVED, player);
+                    }
+                }
+            }
+            player->GetSession()->SendAreaTriggerMessage("Your equipped gear has been destroyed and your talents and glyphs have been reset.");
+
+			// Add new gear, talents and glyphs
             switch (action)
             {
             case 0: // Use Discipline Priest Spec
@@ -906,45 +938,6 @@ public:
                 CloseGossipMenuFor(player);
                 break;
 
-            case 30:
-                sTemplateNpcMgr->RemoveAllGlyphs(player);
-                player->GetSession()->SendAreaTriggerMessage("Your glyphs have been removed.");
-                //GossipHello(player);
-                CloseGossipMenuFor(player);
-                break;
-
-            case 31:
-                player->ResetTalents(true);
-                player->SendTalentsInfoData(false);
-                player->GetSession()->SendAreaTriggerMessage("Your talents have been reset.");
-                CloseGossipMenuFor(player);
-                break;
-
-            case 32:
-                for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
-                {
-                    if (Item* haveItemEquipped = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                    {
-                        if (haveItemEquipped)
-                        {
-                            player->DestroyItemCount(haveItemEquipped->GetEntry(), 1, true, true);
-
-                            if (haveItemEquipped->IsInWorld())
-                            {
-                                haveItemEquipped->RemoveFromWorld();
-                                haveItemEquipped->DestroyForPlayer(player);
-                            }
-
-                            haveItemEquipped->SetGuidValue(ITEM_FIELD_CONTAINED, ObjectGuid::Empty);
-                            haveItemEquipped->SetSlot(NULL_SLOT);
-                            haveItemEquipped->SetState(ITEM_REMOVED, player);
-                        }
-                    }
-                }
-                player->GetSession()->SendAreaTriggerMessage("Your equipped gear has been destroyed.");
-                CloseGossipMenuFor(player);
-                break;
-
             case 100: // Use Discipline Priest Spec
                 sTemplateNpcMgr->sTalentsSpec = "Discipline";
                 LearnOnlyTalentsAndGlyphs(player, sTemplateNpcMgr->sTalentsSpec);
@@ -998,6 +991,12 @@ public:
     }
 };
 
+#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+using namespace Trinity::ChatCommands;
+
 class TemplateNPC_command : public CommandScript
 {
 public:
@@ -1007,12 +1006,12 @@ public:
     {
         static std::vector<ChatCommand> TemplateNPCTable =
         {
-            { "reload",      SEC_ADMINISTRATOR, true , &HandleReloadTemplateNPCCommand, "" }
+            { "reload",      rbac::RBAC_ROLE_ADMINISTRATOR, true , &HandleReloadTemplateNPCCommand, "" }
         };
 
         static std::vector<ChatCommand> commandTable =
         {
-            { "templatenpc", SEC_ADMINISTRATOR, true, nullptr                         , "", TemplateNPCTable }
+            { "templatenpc", rbac::RBAC_ROLE_ADMINISTRATOR, true, nullptr                         , "", TemplateNPCTable }
         };
         return commandTable;
     }
@@ -1020,7 +1019,7 @@ public:
 
     static bool HandleReloadTemplateNPCCommand(ChatHandler* handler, const char* /*args*/)
     {
-        TC_LOG_INFO("server.loading", "misc", "Reloading templates for Template NPC table...");
+        TC_LOG_INFO("server.loading", "Reloading templates for Template NPC table...");
         sTemplateNpcMgr->LoadTalentsContainer();
         sTemplateNpcMgr->LoadGlyphsContainer();
         sTemplateNpcMgr->LoadHumanGearContainer();

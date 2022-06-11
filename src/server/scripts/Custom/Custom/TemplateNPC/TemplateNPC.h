@@ -53,7 +53,7 @@ static void LearnWeaponSkills(Player* player)
         if (player->HasSpell(wepSkills[i]))
             continue;
 
-    switch (player->getClass())
+    switch (player->GetClass())
     {
     case CLASS_WARRIOR:
         player->LearnSpell(THROW_WAR, false);
