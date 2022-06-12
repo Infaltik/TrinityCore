@@ -22,6 +22,44 @@
 #include "Log.h"
 #include "Player.h"
 
+#include "ScriptMgr.h"
+#include "Pet.h"
+#include "SpellHistory.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "World.h"
+
+
+static void ResetSpellCooldowns(Player* player, bool onStartDuel);
+
+static void ResetSpellCooldowns(Player* player, bool onStartDuel)
+{
+    // remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
+    player->GetSpellHistory()->ResetCooldowns([player, onStartDuel](SpellHistory::CooldownStorageType::iterator itr) -> bool
+    {
+        SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(itr->first);
+        uint32 remainingCooldown = player->GetSpellHistory()->GetRemainingCooldown(spellInfo);
+        int32 totalCooldown = spellInfo->RecoveryTime;
+        int32 categoryCooldown = spellInfo->CategoryRecoveryTime;
+
+        player->ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, totalCooldown, nullptr);
+
+        if (int32 cooldownMod = player->GetTotalAuraModifier(SPELL_AURA_MOD_COOLDOWN))
+            totalCooldown += cooldownMod * IN_MILLISECONDS;
+
+        if (!spellInfo->HasAttribute(SPELL_ATTR6_IGNORE_CATEGORY_COOLDOWN_MODS))
+            player->ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, categoryCooldown, nullptr);
+
+        return remainingCooldown > 0;
+    }, true);
+    
+    player->GetSpellHistory()->ResetAllCooldowns();
+
+    // pet cooldowns
+    if (Pet* pet = player->GetPet())
+        pet->GetSpellHistory()->ResetAllCooldowns();
+}
+
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
     Player* player = GetPlayer();
@@ -45,6 +83,10 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 
     player->duel->State = DUEL_STATE_COUNTDOWN;
     target->duel->State = DUEL_STATE_COUNTDOWN;
+	
+	// Reset cds, hp and mana before duel
+	ResetSpellCooldowns(player, true);
+	ResetSpellCooldowns(target, true);
 
     player->SendDuelCountdown(3000);
     target->SendDuelCountdown(3000);
