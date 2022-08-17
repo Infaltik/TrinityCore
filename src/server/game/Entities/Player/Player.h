@@ -1807,8 +1807,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         // duel health and mana reset methods
         void SaveHealthBeforeDuel() { healthBeforeDuel = GetHealth(); }
         void SaveManaBeforeDuel() { manaBeforeDuel = GetPower(POWER_MANA); }
-        void RestoreHealthAfterDuel() { SetHealth(healthBeforeDuel); }
-        void RestoreManaAfterDuel() { SetPower(POWER_MANA, manaBeforeDuel); }
+        void RestoreHealthAfterDuel() { SetHealth(GetMaxHealth()); }
+        void RestoreManaAfterDuel() { SetPower(POWER_MANA, GetMaxPower(POWER_MANA)); }
 
         //End of PvP System
 
