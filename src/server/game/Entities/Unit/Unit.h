@@ -1367,6 +1367,7 @@ class TC_GAME_API Unit : public WorldObject
         void RemoveAurasByShapeShift();
 
         void RemoveAreaAurasDueToLeaveWorld();
+        void RemoveAllNegativeAuras();
         void RemoveAllAuras();
         void RemoveArenaAuras();
         void RemoveAurasOnEvade();

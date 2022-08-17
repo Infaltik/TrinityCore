@@ -4184,6 +4184,51 @@ void Unit::RemoveAreaAurasDueToLeaveWorld()
     }
 }
 
+void Unit::RemoveAllNegativeAuras()
+{
+	for (int counter = 0; !m_appliedAuras.empty() || !m_ownedAuras.empty(); counter++)
+    {
+		AuraApplicationMap::iterator aurAppIter;
+		for (aurAppIter = m_appliedAuras.begin(); aurAppIter != m_appliedAuras.end();)
+		{
+			AuraApplication * aurApp = aurAppIter->second;
+			
+			if (!aurApp->IsPositive())
+			{
+		    	_UnapplyAura(aurAppIter, AURA_REMOVE_BY_DEFAULT);
+		    	continue;
+		    }
+		    ++aurAppIter;
+		}
+		
+		for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
+    	{
+		    Aura* aura = iter->second;
+		    
+		    bool negativeFound = false;
+		    for (uint8 i = 0; i < aura->GetSpellInfo()->GetEffects().size(); ++i)
+		    {
+		        if (!aura->GetSpellInfo()->IsPositiveEffect(i))
+		        {
+		            negativeFound = true;
+		            break;
+		        }
+		    }
+
+		    if (negativeFound)
+		        RemoveOwnedAura(iter, AURA_REMOVE_BY_DEATH);
+		    else
+		        ++iter;
+    	}
+		
+		const int maxIteration = 50;
+        if (counter >= maxIteration)
+        {
+            break;
+        }
+    }
+}
+
 void Unit::RemoveAllAuras()
 {
     // this may be a dead loop if some events on aura remove will continiously apply aura on remove

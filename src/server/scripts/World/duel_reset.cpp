@@ -48,10 +48,12 @@ class DuelResetScript : public PlayerScript
                 player1->SaveHealthBeforeDuel();
                 player1->SaveManaBeforeDuel();
                 player1->ResetAllPowers();
+                player1->RemoveAllNegativeAuras();
 
                 player2->SaveHealthBeforeDuel();
                 player2->SaveManaBeforeDuel();
                 player2->ResetAllPowers();
+                player2->RemoveAllNegativeAuras();
             }
         }
 
@@ -76,6 +78,8 @@ class DuelResetScript : public PlayerScript
                 {
                     winner->RestoreHealthAfterDuel();
                     loser->RestoreHealthAfterDuel();
+                    winner->RemoveAllNegativeAuras();
+                    loser->RemoveAllNegativeAuras();
 
                     // check if player1 class uses mana
                     if (winner->GetPowerType() == POWER_MANA || winner->GetClass() == CLASS_DRUID)
