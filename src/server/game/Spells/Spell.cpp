@@ -6150,6 +6150,10 @@ SpellCastResult Spell::CheckCasterAuras(uint32* param1) const
 
     // SPELL_ATTR5_USABLE_WHILE_FEARED by default only fear (ie no horror)
     bool usableWhileFeared = m_spellInfo->HasAttribute(SPELL_ATTR5_USABLE_WHILE_FEARED);
+    if (m_spellInfo->Id == 642 || m_spellInfo->Id == 45438) // 642 = Divine Shield, 45438 = Ice Block
+    {
+    	usableWhileFeared = true;
+    }
 
     // SPELL_ATTR5_USABLE_WHILE_CONFUSED by default only disorient (ie no polymorph)
     bool usableWhileConfused = m_spellInfo->HasAttribute(SPELL_ATTR5_USABLE_WHILE_CONFUSED);
@@ -6241,6 +6245,11 @@ SpellCastResult Spell::CheckCasterAuras(uint32* param1) const
         if (usableWhileFeared)
         {
             SpellCastResult mechanicResult = mechanicCheck(SPELL_AURA_MOD_FEAR);
+            if (m_spellInfo->Id == 642 || m_spellInfo->Id == 45438) // 642 = Divine Shield, 45438 = Ice Block
+			{
+				mechanicResult = SPELL_CAST_OK;
+			}
+			
             if (mechanicResult != SPELL_CAST_OK)
                 result = mechanicResult;
         }

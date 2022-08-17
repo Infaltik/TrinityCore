@@ -338,6 +338,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     // ignore for remote control state (for player case)
     Unit* mover = GetGameClient()->GetActivelyMovedUnit();
+    
+    if (!mover && (spellId == 642 || spellId == 45438)) // 642 = Divine Shield, 45438 = Ice Block
+    {
+		mover = _player;
+    }
+    
     if (!mover || (mover != _player && mover->GetTypeId() == TYPEID_PLAYER))
     {
         recvPacket.rfinish(); // prevent spam at ignore packet
